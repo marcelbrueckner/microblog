@@ -13,6 +13,7 @@ from elasticsearch import Elasticsearch
 from redis import Redis
 import rq
 from config import Config
+from prometheus_flask_exporter import PrometheusMetrics
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -27,6 +28,7 @@ babel = Babel()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
+    PrometheusMetrics(app)
     app.config.from_object(config_class)
 
     db.init_app(app)
