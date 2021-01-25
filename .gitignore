@@ -48,3 +48,9 @@ terraform/ansible_inventory.ini
 terraform/*.pem
 terraform/terraform.tfvars
 terraform/output/
+
+# Ansible
+ansible/hosts.ini
+ansible/*.pem
+ansible/files/microblog/docker_config.json
+ansible/group_vars/all.yml

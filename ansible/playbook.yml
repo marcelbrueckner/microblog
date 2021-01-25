@@ -1,0 +1,57 @@
+- name: Deploy microblog
+  hosts: all
+  become: yes
+
+  tasks:
+    # Common prerequisites
+    - name: Install Docker
+      import_role:
+        name: geerlingguy.docker
+    - name: Ensure {{ ansible_env.HOME }}/.docker directory exists
+      file: 
+        path: "{{ ansible_env.HOME }}/.docker"
+        state: directory
+        recurse: yes
+    - name: Ensure /opt/{{ inventory_hostname }} directory exists
+      file: 
+        path: /opt/{{ inventory_hostname }}
+        state: directory
+        recurse: yes
+    
+    # Microblog application
+    - name: Microblog application
+      block:
+        - name: Transfer Docker auth config
+          copy:
+            src: "{{ inventory_hostname }}/docker_config.json"
+            dest: "{{ ansible_env.HOME }}/.docker/config.json"
+            mode: 0640
+      when: inventory_hostname == "microblog"
+    
+    # Monitoring
+    - name: Microblog application
+      block:
+        - name: Ensure {{ item }} directory exists
+          file: 
+            path: "{{ item }}"
+            state: directory
+            recurse: yes
+          loop:
+            - /opt/{{ inventory_hostname }}/grafana
+            - /opt/{{ inventory_hostname }}/prometheus
+        - name: Render Prometheus configuration
+          template:
+            src: "{{ inventory_hostname }}/prometheus/prometheus.yml.j2"
+            dest: /opt/{{ inventory_hostname }}/prometheus/prometheus.yml
+      when: inventory_hostname == "monitoring"
+
+    # Common tasks
+    - name: Render docker-compose template
+      template:
+        src: "{{ inventory_hostname }}/docker-compose.yml.j2"
+        dest: /opt/{{ inventory_hostname }}/docker-compose.yml
+    - name: Start services
+      command: /usr/local/bin/docker-compose up -d
+      args:
+        chdir: /opt/{{ inventory_hostname }}/
+    

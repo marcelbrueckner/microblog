@@ -1,0 +1,43 @@
+---
+version: '3'
+
+services:
+  microblog:
+    image: {{ app_ecr_repository_url }}
+    container_name: microblog
+    environment:
+      - DATABASE_URL=mysql+pymysql://microblog:microblog@microblog_db/microblog
+      - TZ=Europe/Berlin
+    ports:
+      - "80:5000"
+    depends_on:
+      - microblog_db
+
+  microblog_db:
+    image: mariadb:10.5.4
+    container_name: microblog_db
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_USER=microblog
+      - MYSQL_PASSWORD=microblog
+      - MYSQL_DATABASE=microblog
+      - TZ=Europe/Berlin
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.ignored-mount-points="^(/rootfs|/host|)/(sys|proc|dev|host|etc)($$|/)"'
+      - '--collector.filesystem.ignored-fs-types="^(sys|proc|auto|cgroup|devpts|ns|au|fuse\.lxc|mqueue)(fs|)$$"'
