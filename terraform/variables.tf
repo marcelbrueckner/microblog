@@ -1,0 +1,3 @@
+variable "purpose" {
+  type = string
+}

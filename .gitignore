@@ -38,3 +38,13 @@ nosetests.xml
 venv
 app.db
 microblog.log*
+
+# Terraform
+terraform/.terraform
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/ansible_inventory.ini
+terraform/*.pem
+terraform/terraform.tfvars
+terraform/output/
